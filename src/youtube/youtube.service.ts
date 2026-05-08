@@ -86,15 +86,37 @@ export class YoutubeService {
   }
 
   async getChannelByUrl(url: string): Promise<YouTubeChannelInfo> {
-    const channelId = this.extractChannelId(url);
-    if (!channelId) throw new Error('Invalid YouTube channel URL');
+    const identifier = this.extractChannelId(url);
+    if (!identifier) throw new Error('Invalid YouTube channel URL');
 
-    return this.getChannelInfo(channelId);
+    const params: any = { part: 'snippet', key: this.apiKey };
+
+    if (/^UC[\w-]{22}$/.test(identifier)) {
+      params.id = identifier;
+    } else {
+      params.forHandle = identifier;
+    }
+
+    const response = await firstValueFrom(
+      this.httpService.get('https://www.googleapis.com/youtube/v3/channels', { params }),
+    );
+
+    const item = response.data?.items?.[0];
+    if (!item) throw new Error('Channel not found');
+
+    const snippet = item.snippet;
+    return {
+      channelId: item.id,
+      title: snippet.title,
+      thumbnail: snippet.thumbnails?.high?.url || snippet.thumbnails?.default?.url,
+    };
   }
 
   async getVideosByChannel(channelId: string, maxResults = 10): Promise<YouTubePlaylistVideoInfo[]> {
     try {
       const uploadsPlaylistId = channelId.replace(/^UC/, 'UU');
+
+      this.logger.log(`Fetching playlist: ${uploadsPlaylistId}, key length: ${this.apiKey?.length || 0}`);
 
       const response = await firstValueFrom(
         this.httpService.get('https://www.googleapis.com/youtube/v3/playlistItems', {
@@ -107,7 +129,10 @@ export class YoutubeService {
         }),
       );
 
-      return response.data.items.map((item: any) => ({
+      this.logger.log(`YouTube API response status: ${response.status}, items: ${response.data?.items?.length || 0}`);
+
+      const items = response.data?.items || [];
+      return items.map((item: any) => ({
         youtubeVideoId: item.contentDetails.videoId,
         title: item.snippet.title,
         thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url,
@@ -142,11 +167,14 @@ export class YoutubeService {
       /(?:youtube\.com\/channel\/)(UC[\w-]{22})/,
       /(?:youtube\.com\/@)([\w-]+)/,
       /(?:youtube\.com\/c\/)([\w-]+)/,
+      /(?:youtube\.com\/)([\w-]{3,})/,
     ];
 
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match) {
+        const reserved = ['feed', 'results', 'account', 'about', 'ads', 't', 'o', 'watch', 'playlist', 'embed'];
+        if (reserved.includes(match[1])) continue;
         if (pattern.toString().includes('UC')) return match[1];
         return match[1];
       }

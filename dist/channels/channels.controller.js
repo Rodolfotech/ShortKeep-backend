@@ -31,8 +31,10 @@ let ChannelsController = class ChannelsController {
     getLatestShorts(req) {
         return this.channelsService.getLatestShortsFromFollowing(req.user.id);
     }
-    findOne(id, req) {
-        return this.channelsService.findOne(id, req.user.id);
+    async findOne(id, req) {
+        const channel = await this.channelsService.findOne(id, req.user.id);
+        const shorts = await this.channelsService.getShortsByChannel(id, req.user.id);
+        return { channel, shorts };
     }
     remove(id, req) {
         return this.channelsService.remove(id, req.user.id);
@@ -69,12 +71,12 @@ __decorate([
 ], ChannelsController.prototype, "getLatestShorts", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Detalle de un canal' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Detalle de un canal con sus shorts' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ChannelsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Delete)(':id'),

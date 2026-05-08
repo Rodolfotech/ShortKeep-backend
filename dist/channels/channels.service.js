@@ -22,21 +22,28 @@ let ChannelsService = class ChannelsService {
         this.youtube = youtube;
     }
     async create(dto, userId) {
-        const info = await this.youtube.getChannelByUrl(dto.url);
-        const existing = await this.prisma.canales.findFirst({
-            where: { youtube_channel_id: info.channelId, id_usuario: userId },
-        });
-        if (existing)
-            throw new common_1.ConflictException('Channel already added');
-        return this.prisma.canales.create({
-            data: {
-                id_canal: (0, node_crypto_1.randomUUID)(),
-                youtube_channel_id: info.channelId,
-                nombre_canal: info.title,
-                url_miniatura: info.thumbnail,
-                id_usuario: userId,
-            },
-        });
+        try {
+            const info = await this.youtube.getChannelByUrl(dto.url);
+            const existing = await this.prisma.canales.findFirst({
+                where: { youtube_channel_id: info.channelId, id_usuario: userId },
+            });
+            if (existing)
+                throw new common_1.ConflictException('Channel already added');
+            return this.prisma.canales.create({
+                data: {
+                    id_canal: (0, node_crypto_1.randomUUID)(),
+                    youtube_channel_id: info.channelId,
+                    nombre_canal: info.title,
+                    url_miniatura: info.thumbnail,
+                    id_usuario: userId,
+                },
+            });
+        }
+        catch (error) {
+            if (error instanceof common_1.ConflictException)
+                throw error;
+            throw new common_1.BadRequestException(error.message || 'Invalid YouTube channel URL');
+        }
     }
     findAll(userId) {
         return this.prisma.canales.findMany({
@@ -51,6 +58,12 @@ let ChannelsService = class ChannelsService {
         if (!channel)
             throw new common_1.NotFoundException('Channel not found');
         return channel;
+    }
+    async getShortsByChannel(channelId, userId) {
+        return this.prisma.shorts.findMany({
+            where: { id_usuario: userId, id_canal: channelId },
+            orderBy: { fecha_publicacion_yt: 'desc' },
+        });
     }
     async remove(id, userId) {
         await this.findOne(id, userId);
@@ -79,28 +92,36 @@ let ChannelsService = class ChannelsService {
         return results;
     }
     async sync(id, userId) {
-        const channel = await this.findOne(id, userId);
-        const videos = await this.youtube.getVideosByChannel(channel.youtube_channel_id);
-        const results = [];
-        for (const video of videos) {
-            const existing = await this.prisma.shorts.findFirst({
-                where: { youtube_video_id: video.youtubeVideoId, id_usuario: userId },
-            });
-            if (existing)
-                continue;
-            const created = await this.prisma.shorts.create({
-                data: {
-                    id_short: (0, node_crypto_1.randomUUID)(),
-                    youtube_video_id: video.youtubeVideoId,
-                    titulo: video.title,
-                    url_miniatura: video.thumbnail,
-                    fecha_publicacion_yt: new Date(video.publishedAt),
-                    id_usuario: userId,
-                },
-            });
-            results.push(created);
+        try {
+            const channel = await this.findOne(id, userId);
+            const videos = await this.youtube.getVideosByChannel(channel.youtube_channel_id);
+            const results = [];
+            for (const video of videos) {
+                const existing = await this.prisma.shorts.findFirst({
+                    where: { youtube_video_id: video.youtubeVideoId, id_usuario: userId },
+                });
+                if (existing)
+                    continue;
+                const created = await this.prisma.shorts.create({
+                    data: {
+                        id_short: (0, node_crypto_1.randomUUID)(),
+                        youtube_video_id: video.youtubeVideoId,
+                        titulo: video.title,
+                        url_miniatura: video.thumbnail,
+                        fecha_publicacion_yt: new Date(video.publishedAt),
+                        id_usuario: userId,
+                        id_canal: id,
+                    },
+                });
+                results.push(created);
+            }
+            return { channel: channel.nombre_canal, synced: results.length, shorts: results };
         }
-        return { channel: channel.nombre_canal, synced: results.length, shorts: results };
+        catch (error) {
+            if (error instanceof common_1.NotFoundException)
+                throw error;
+            throw new common_1.InternalServerErrorException(error.message || 'Error syncing shorts');
+        }
     }
     async syncAllChannels() {
         const channels = await this.prisma.canales.findMany();
