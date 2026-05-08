@@ -1,0 +1,77 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+export declare class UsersService {
+    private prisma;
+    constructor(prisma: PrismaService);
+    create(dto: CreateUserDto): Promise<{
+        email: string;
+        password: string;
+        nombre: string | null;
+        id_cargo: number | null;
+        id_usuario: string;
+        fecha_registro: Date | null;
+    }>;
+    findAll(): import(".prisma/client").Prisma.PrismaPromise<({
+        cargo: {
+            id_cargo: number;
+            nombre_cargo: string;
+        } | null;
+    } & {
+        email: string;
+        password: string;
+        nombre: string | null;
+        id_cargo: number | null;
+        id_usuario: string;
+        fecha_registro: Date | null;
+    })[]>;
+    findOne(id: string): Promise<{
+        canales: {
+            id_usuario: string | null;
+            url_miniatura: string | null;
+            id_canal: string;
+            youtube_channel_id: string;
+            nombre_canal: string;
+        }[];
+        cargo: {
+            id_cargo: number;
+            nombre_cargo: string;
+        } | null;
+        shorts: {
+            id_usuario: string | null;
+            tags: import("@prisma/client/runtime/library").JsonValue | null;
+            categoria: string | null;
+            fecha_guardado: Date | null;
+            titulo: string;
+            visto: boolean | null;
+            id_short: string;
+            youtube_video_id: string;
+            url_miniatura: string | null;
+            descripcion: string | null;
+            fecha_publicacion_yt: Date | null;
+        }[];
+    } & {
+        email: string;
+        password: string;
+        nombre: string | null;
+        id_cargo: number | null;
+        id_usuario: string;
+        fecha_registro: Date | null;
+    }>;
+    update(id: string, dto: UpdateUserDto): Promise<{
+        email: string;
+        password: string;
+        nombre: string | null;
+        id_cargo: number | null;
+        id_usuario: string;
+        fecha_registro: Date | null;
+    }>;
+    remove(id: string): Promise<{
+        email: string;
+        password: string;
+        nombre: string | null;
+        id_cargo: number | null;
+        id_usuario: string;
+        fecha_registro: Date | null;
+    }>;
+}

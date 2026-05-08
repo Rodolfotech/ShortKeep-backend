@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model canales {
+  id_canal           String    @id @db.VarChar(36)
+  youtube_channel_id String    @unique(map: "youtube_channel_id") @db.VarChar(50)
+  nombre_canal       String    @db.VarChar(150)
+  url_miniatura      String?   @db.VarChar(255)
+  id_usuario         String?   @db.VarChar(36)
+  usuarios           usuarios? @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction, map: "fk_canal_usuario")
+
+  @@index([id_usuario], map: "fk_canal_usuario")
+}
+
+model cargo {
+  id_cargo     Int        @id @default(autoincrement())
+  nombre_cargo String     @db.VarChar(50)
+  usuarios     usuarios[]
+}
+
+model shorts {
+  id_short             String    @id @db.VarChar(36)
+  youtube_video_id     String    @unique(map: "youtube_video_id") @db.VarChar(20)
+  titulo               String    @db.VarChar(255)
+  url_miniatura        String?   @db.VarChar(255)
+  descripcion          String?   @db.Text
+  tags                 Json?
+  categoria            String?   @default("General") @db.VarChar(50)
+  visto                Boolean?  @default(false)
+  fecha_publicacion_yt DateTime? @db.DateTime(0)
+  fecha_guardado       DateTime? @default(now()) @db.Timestamp(0)
+  id_usuario           String?   @db.VarChar(36)
+  usuarios             usuarios? @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction, map: "fk_short_usuario")
+
+  @@index([id_usuario], map: "fk_short_usuario")
+}
+
+model sistema_salud {
+  id_salud     Int    @id @default(autoincrement())
+  nombre_salud String @db.VarChar(50)
+}
+
+model tipo_contrato {
+  id_tipo_contrato Int    @id @default(autoincrement())
+  nombre_tipo      String @db.VarChar(50)
+}
+
+model usuarios {
+  id_usuario     String    @id @db.VarChar(36)
+  email          String    @unique(map: "email") @db.VarChar(100)
+  password       String    @db.VarChar(255)
+  nombre         String?   @db.VarChar(100)
+  id_cargo       Int?
+  fecha_registro DateTime? @default(now()) @db.Timestamp(0)
+  canales        canales[]
+  shorts         shorts[]
+  cargo          cargo?    @relation(fields: [id_cargo], references: [id_cargo], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_cargo")
+
+  @@index([id_cargo], map: "fk_usuario_cargo")
+}
