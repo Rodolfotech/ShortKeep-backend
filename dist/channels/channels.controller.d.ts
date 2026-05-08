@@ -4,18 +4,18 @@ export declare class ChannelsController {
     private readonly channelsService;
     constructor(channelsService: ChannelsService);
     create(dto: CreateChannelDto, req: any): Promise<{
+        url_miniatura: string | null;
+        id_usuario: string | null;
         id_canal: string;
         youtube_channel_id: string;
         nombre_canal: string;
-        url_miniatura: string | null;
-        id_usuario: string | null;
     }>;
     findAll(req: any): import(".prisma/client").Prisma.PrismaPromise<{
+        url_miniatura: string | null;
+        id_usuario: string | null;
         id_canal: string;
         youtube_channel_id: string;
         nombre_canal: string;
-        url_miniatura: string | null;
-        id_usuario: string | null;
     }[]>;
     getLatestShorts(req: any): Promise<({
         channel: {
@@ -35,18 +35,18 @@ export declare class ChannelsController {
         error: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
+        url_miniatura: string | null;
+        id_usuario: string | null;
         id_canal: string;
         youtube_channel_id: string;
         nombre_canal: string;
-        url_miniatura: string | null;
-        id_usuario: string | null;
     }>;
     remove(id: string, req: any): Promise<{
+        url_miniatura: string | null;
+        id_usuario: string | null;
         id_canal: string;
         youtube_channel_id: string;
         nombre_canal: string;
-        url_miniatura: string | null;
-        id_usuario: string | null;
     }>;
     sync(id: string, req: any): Promise<{
         channel: string;
