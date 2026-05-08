@@ -28,9 +28,11 @@ export class ChannelsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Detalle de un canal' })
-  findOne(@Param('id') id: string, @Req() req: any) {
-    return this.channelsService.findOne(id, req.user.id);
+  @ApiOperation({ summary: 'Detalle de un canal con sus shorts' })
+  async findOne(@Param('id') id: string, @Req() req: any) {
+    const channel = await this.channelsService.findOne(id, req.user.id);
+    const shorts = await this.channelsService.getShortsByChannel(id, req.user.id);
+    return { channel, shorts };
   }
 
   @Delete(':id')

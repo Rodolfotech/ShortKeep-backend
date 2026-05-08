@@ -36,9 +36,11 @@ model shorts {
   fecha_publicacion_yt DateTime? @db.DateTime(0)
   fecha_guardado       DateTime? @default(now()) @db.Timestamp(0)
   id_usuario           String?   @db.VarChar(36)
+  id_canal             String?   @db.VarChar(36)
   usuarios             usuarios? @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction, map: "fk_short_usuario")
 
   @@index([id_usuario], map: "fk_short_usuario")
+  @@index([id_canal], map: "idx_short_canal")
 }
 
 model sistema_salud {

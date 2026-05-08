@@ -35,11 +35,27 @@ export declare class ChannelsController {
         error: string;
     })[]>;
     findOne(id: string, req: any): Promise<{
-        url_miniatura: string | null;
-        id_usuario: string | null;
-        id_canal: string;
-        youtube_channel_id: string;
-        nombre_canal: string;
+        channel: {
+            url_miniatura: string | null;
+            id_usuario: string | null;
+            id_canal: string;
+            youtube_channel_id: string;
+            nombre_canal: string;
+        };
+        shorts: {
+            id_short: string;
+            youtube_video_id: string;
+            titulo: string;
+            url_miniatura: string | null;
+            descripcion: string | null;
+            tags: import("@prisma/client/runtime/library").JsonValue | null;
+            categoria: string | null;
+            visto: boolean | null;
+            fecha_publicacion_yt: Date | null;
+            fecha_guardado: Date | null;
+            id_usuario: string | null;
+            id_canal: string | null;
+        }[];
     }>;
     remove(id: string, req: any): Promise<{
         url_miniatura: string | null;

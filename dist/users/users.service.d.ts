@@ -28,10 +28,10 @@ export declare class UsersService {
     findOne(id: string): Promise<{
         canales: {
             id_usuario: string | null;
-            url_miniatura: string | null;
             id_canal: string;
             youtube_channel_id: string;
             nombre_canal: string;
+            url_miniatura: string | null;
         }[];
         cargo: {
             id_cargo: number;
@@ -39,16 +39,17 @@ export declare class UsersService {
         } | null;
         shorts: {
             id_usuario: string | null;
-            tags: import("@prisma/client/runtime/library").JsonValue | null;
-            categoria: string | null;
-            fecha_guardado: Date | null;
-            titulo: string;
-            visto: boolean | null;
+            id_canal: string | null;
+            url_miniatura: string | null;
             id_short: string;
             youtube_video_id: string;
-            url_miniatura: string | null;
+            titulo: string;
             descripcion: string | null;
+            tags: import("@prisma/client/runtime/library").JsonValue | null;
+            categoria: string | null;
+            visto: boolean | null;
             fecha_publicacion_yt: Date | null;
+            fecha_guardado: Date | null;
         }[];
     } & {
         email: string;

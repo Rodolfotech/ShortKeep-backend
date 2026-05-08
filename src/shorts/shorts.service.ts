@@ -41,32 +41,30 @@ export class ShortsService {
   async findAll(userId: string, query?: QueryShortsDto) {
     const conditions: string[] = [];
     const params: any[] = [];
-    let paramIndex = 1;
 
-    conditions.push(`id_usuario = $${paramIndex++}`);
+    conditions.push(`id_usuario = ?`);
     params.push(userId);
 
     if (query?.categoria) {
-      conditions.push(`categoria = $${paramIndex++}`);
+      conditions.push(`categoria = ?`);
       params.push(query.categoria);
     }
 
     if (query?.visto !== undefined) {
       const visto = query.visto === 'true' || query.visto === true;
-      conditions.push(`visto = $${paramIndex++}`);
+      conditions.push(`visto = ?`);
       params.push(visto);
     }
 
     if (query?.tag) {
-      conditions.push(`JSON_CONTAINS(tags, $${paramIndex++})`);
+      conditions.push(`JSON_CONTAINS(tags, ?)`);
       params.push(JSON.stringify(query.tag));
     }
 
     if (query?.q) {
       const searchTerm = `%${query.q}%`;
-      conditions.push(`(titulo LIKE $${paramIndex} OR descripcion LIKE $${paramIndex})`);
-      params.push(searchTerm);
-      paramIndex++;
+      conditions.push(`(titulo LIKE ? OR descripcion LIKE ?)`);
+      params.push(searchTerm, searchTerm);
     }
 
     let orderClause = 'fecha_guardado DESC';
