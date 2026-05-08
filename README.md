@@ -43,6 +43,17 @@ npm run build && npm run start:prod
 
 El servidor arranca en `http://localhost:3000`.
 
+### CORS
+
+Los CORS ya están habilitados globalmente en `main.ts`. Si tu frontend corre en otro puerto/dominio (ej. Next.js en puerto 3000 o Vercel), no deberías tener bloqueos. Si necesitas restringir orígenes específicos, edita `app.enableCors()` en `src/main.ts`:
+
+```ts
+app.enableCors({
+  origin: ['http://localhost:3000', 'https://tudominio.vercel.app'],
+  credentials: true,
+});
+```
+
 ## Documentación Swagger
 
 Una vez corriendo, la documentación interactiva de todos los endpoints está disponible en:
