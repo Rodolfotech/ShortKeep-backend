@@ -7,31 +7,31 @@ export declare class ChannelsService {
     constructor(prisma: PrismaService, youtube: YoutubeService);
     create(dto: CreateChannelDto, userId: string): Promise<{
         id_usuario: string | null;
-        url_miniatura: string | null;
         id_canal: string;
         youtube_channel_id: string;
         nombre_canal: string;
+        url_miniatura: string | null;
     }>;
     findAll(userId: string): import(".prisma/client").Prisma.PrismaPromise<{
         id_usuario: string | null;
-        url_miniatura: string | null;
         id_canal: string;
         youtube_channel_id: string;
         nombre_canal: string;
+        url_miniatura: string | null;
     }[]>;
     findOne(id: string, userId: string): Promise<{
         id_usuario: string | null;
-        url_miniatura: string | null;
         id_canal: string;
         youtube_channel_id: string;
         nombre_canal: string;
+        url_miniatura: string | null;
     }>;
     remove(id: string, userId: string): Promise<{
         id_usuario: string | null;
-        url_miniatura: string | null;
         id_canal: string;
         youtube_channel_id: string;
         nombre_canal: string;
+        url_miniatura: string | null;
     }>;
     getLatestShortsFromFollowing(userId: string): Promise<({
         channel: {

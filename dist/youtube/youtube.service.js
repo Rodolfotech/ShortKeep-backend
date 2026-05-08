@@ -48,29 +48,30 @@ let YoutubeService = YoutubeService_1 = class YoutubeService {
             publishedAt: snippet.publishedAt,
         };
     }
-    async getChannelInfo(channelId) {
-        const response = await (0, rxjs_1.firstValueFrom)(this.httpService.get('https://www.googleapis.com/youtube/v3/channels', {
-            params: {
-                part: 'snippet',
-                id: channelId,
-                key: this.apiKey,
-            },
-        }));
+    async getChannelInfo(channelIdOrHandle) {
+        const params = { part: 'snippet', key: this.apiKey };
+        if (channelIdOrHandle.startsWith('UC')) {
+            params.id = channelIdOrHandle;
+        }
+        else {
+            params.forHandle = `@${channelIdOrHandle}`;
+        }
+        const response = await (0, rxjs_1.firstValueFrom)(this.httpService.get('https://www.googleapis.com/youtube/v3/channels', { params }));
         const item = response.data?.items?.[0];
         if (!item)
             throw new Error('Channel not found');
         const snippet = item.snippet;
         return {
-            channelId,
+            channelId: item.id,
             title: snippet.title,
             thumbnail: snippet.thumbnails?.high?.url || snippet.thumbnails?.default?.url,
         };
     }
     async getChannelByUrl(url) {
-        const channelId = this.extractChannelId(url);
-        if (!channelId)
+        const identifier = this.extractChannelId(url);
+        if (!identifier)
             throw new Error('Invalid YouTube channel URL');
-        return this.getChannelInfo(channelId);
+        return this.getChannelInfo(identifier);
     }
     async getVideosByChannel(channelId, maxResults = 10) {
         try {
@@ -123,6 +124,12 @@ let YoutubeService = YoutubeService_1 = class YoutubeService {
                 return match[1];
             }
         }
+        const handleMatch = url.match(/youtube\.com\/(feed|results|account|about|ads|t|o)\b/);
+        if (handleMatch)
+            return null;
+        const genericMatch = url.match(/youtube\.com\/([\w-]{3,})/);
+        if (genericMatch)
+            return genericMatch[1];
         if (/^UC[\w-]{22}$/.test(url))
             return url;
         return null;

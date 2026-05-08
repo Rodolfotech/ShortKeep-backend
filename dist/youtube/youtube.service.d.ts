@@ -25,7 +25,7 @@ export declare class YoutubeService {
     private readonly apiKey;
     constructor(configService: ConfigService, httpService: HttpService);
     getVideoInfo(url: string): Promise<YouTubeVideoInfo>;
-    getChannelInfo(channelId: string): Promise<YouTubeChannelInfo>;
+    getChannelInfo(channelIdOrHandle: string): Promise<YouTubeChannelInfo>;
     getChannelByUrl(url: string): Promise<YouTubeChannelInfo>;
     getVideosByChannel(channelId: string, maxResults?: number): Promise<YouTubePlaylistVideoInfo[]>;
     extractVideoId(url: string): string | null;

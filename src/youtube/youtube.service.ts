@@ -63,15 +63,17 @@ export class YoutubeService {
     };
   }
 
-  async getChannelInfo(channelId: string): Promise<YouTubeChannelInfo> {
+  async getChannelInfo(channelIdOrHandle: string): Promise<YouTubeChannelInfo> {
+    const params: any = { part: 'snippet', key: this.apiKey };
+
+    if (channelIdOrHandle.startsWith('UC')) {
+      params.id = channelIdOrHandle;
+    } else {
+      params.forHandle = `@${channelIdOrHandle}`;
+    }
+
     const response = await firstValueFrom(
-      this.httpService.get('https://www.googleapis.com/youtube/v3/channels', {
-        params: {
-          part: 'snippet',
-          id: channelId,
-          key: this.apiKey,
-        },
-      }),
+      this.httpService.get('https://www.googleapis.com/youtube/v3/channels', { params }),
     );
 
     const item = response.data?.items?.[0];
@@ -79,17 +81,17 @@ export class YoutubeService {
 
     const snippet = item.snippet;
     return {
-      channelId,
+      channelId: item.id,
       title: snippet.title,
       thumbnail: snippet.thumbnails?.high?.url || snippet.thumbnails?.default?.url,
     };
   }
 
   async getChannelByUrl(url: string): Promise<YouTubeChannelInfo> {
-    const channelId = this.extractChannelId(url);
-    if (!channelId) throw new Error('Invalid YouTube channel URL');
+    const identifier = this.extractChannelId(url);
+    if (!identifier) throw new Error('Invalid YouTube channel URL');
 
-    return this.getChannelInfo(channelId);
+    return this.getChannelInfo(identifier);
   }
 
   async getVideosByChannel(channelId: string, maxResults = 10): Promise<YouTubePlaylistVideoInfo[]> {
@@ -151,6 +153,12 @@ export class YoutubeService {
         return match[1];
       }
     }
+
+    const handleMatch = url.match(/youtube\.com\/(feed|results|account|about|ads|t|o)\b/);
+    if (handleMatch) return null;
+
+    const genericMatch = url.match(/youtube\.com\/([\w-]{3,})/);
+    if (genericMatch) return genericMatch[1];
 
     if (/^UC[\w-]{22}$/.test(url)) return url;
 
